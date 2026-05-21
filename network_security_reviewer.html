@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Network Security IT – Exam Reviewer</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1f2937;
+    --border: #30363d;
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --correct: #22c55e;
+    --wrong: #ef4444;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --warning: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    min-height: 100vh;
+  }
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .score-bar {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .score-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .score-badge .val { color: var(--accent); font-weight: 700; font-size: 15px; }
+  .score-badge.correct-badge .val { color: var(--correct); }
+  .score-badge.wrong-badge .val { color: var(--wrong); }
+
+  /* PROGRESS */
+  .progress-wrap {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+  }
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  /* MAIN */
+  main { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* QUESTION CARD */
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    transition: border-color 0.2s;
+    position: relative;
+  }
+  .question-card.answered-correct { border-color: var(--correct); }
+  .question-card.answered-wrong { border-color: var(--wrong); }
+
+  .q-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    gap: 12px;
+  }
+  .q-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    white-space: nowrap;
+    padding-top: 2px;
+  }
+  .q-text {
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.6;
+    flex: 1;
+  }
+  .q-badge {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .q-badge.multi { background: #3b1f6e; color: #c084fc; border: 1px solid #7c3aed; }
+  .q-badge.truefalse { background: #1c3a2e; color: #4ade80; border: 1px solid #16a34a; }
+  .q-badge.order { background: #1e2d40; color: #60a5fa; border: 1px solid #2563eb; }
+  .q-badge.dropdown { background: #2d2000; color: #fbbf24; border: 1px solid #d97706; }
+
+  /* OPTIONS */
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .option:hover:not(.locked) { border-color: var(--accent); background: #0d2030; }
+  .option.selected { border-color: var(--accent2); background: #1a0f2e; }
+  .option.correct-ans { border-color: var(--correct) !important; background: #0a2318 !important; }
+  .option.wrong-ans { border-color: var(--wrong) !important; background: #2a0a0a !important; }
+  .option.reveal-correct { border-color: var(--correct) !important; background: #0a2318 !important; }
+  .option.locked { cursor: default; }
+
+  .opt-letter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .opt-text { font-size: 14px; line-height: 1.5; }
+  .opt-icon { margin-left: auto; font-size: 16px; flex-shrink: 0; }
+
+  /* FEEDBACK */
+  .feedback {
+    margin-top: 14px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.6;
+    display: none;
+    animation: fadeIn 0.2s ease;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct-fb { background: #0a2318; border: 1px solid var(--correct); color: #86efac; }
+  .feedback.wrong-fb { background: #2a0a0a; border: 1px solid var(--wrong); color: #fca5a5; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  /* TRUE/FALSE */
+  .tf-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; padding: 10px 14px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border); }
+  .tf-stmt { flex: 1; font-size: 13.5px; line-height: 1.5; }
+  .tf-btns { display: flex; gap: 8px; flex-shrink: 0; }
+  .tf-btn {
+    padding: 5px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tf-btn:hover:not(.locked) { border-color: var(--accent); }
+  .tf-btn.selected-t { border-color: var(--accent2); background: #1a0f2e; }
+  .tf-btn.selected-f { border-color: var(--warning); background: #1f1200; }
+  .tf-btn.correct-t, .tf-btn.correct-f { border-color: var(--correct) !important; background: #0a2318 !important; color: var(--correct) !important; }
+  .tf-btn.wrong-sel { border-color: var(--wrong) !important; background: #2a0a0a !important; color: var(--wrong) !important; }
+  .tf-row.tf-correct { background: #0a2318; border-color: var(--correct); }
+  .tf-row.tf-wrong { background: #2a0a0a; border-color: var(--wrong); }
+
+  /* DRAG & DROP / ORDER */
+  .order-wrap { display: flex; gap: 16px; flex-wrap: wrap; }
+  .order-source, .order-target { flex: 1; min-width: 200px; }
+  .order-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); letter-spacing: 1px; margin-bottom: 8px; text-transform: uppercase; }
+  .order-item {
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .order-item:hover:not(.locked) { border-color: var(--accent); }
+  .order-item.placed { opacity: 0.4; cursor: default; }
+  .order-slot {
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    background: #0d1117;
+    border: 1px dashed var(--border);
+    font-size: 13px;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .order-slot .slot-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); }
+  .order-slot.filled { background: var(--surface2); border-style: solid; border-color: var(--border); }
+  .order-slot .slot-text { flex: 1; }
+  .order-slot .slot-remove { cursor: pointer; color: var(--muted); font-size: 14px; }
+  .order-slot .slot-remove:hover { color: var(--wrong); }
+  .order-slot.correct-slot { border-color: var(--correct); background: #0a2318; }
+  .order-slot.wrong-slot { border-color: var(--wrong); background: #2a0a0a; }
+
+  /* DRAG DROP MATCH */
+  .match-wrap { display: flex; gap: 16px; }
+  .match-source { flex: 1; }
+  .match-targets { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+  .match-item {
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .match-item:hover:not(.locked) { border-color: var(--accent); }
+  .match-item.selected-item { border-color: var(--accent); background: #0d2030; }
+  .match-item.placed { opacity: 0.4; }
+  .match-target-row { display: flex; align-items: center; gap: 10px; }
+  .match-target-label { font-size: 13px; font-weight: 500; flex: 1; }
+  .match-drop {
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    min-height: 42px;
+    min-width: 160px;
+    padding: 8px 12px;
+    background: #0d1117;
+    font-size: 12.5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+    flex: 1.2;
+  }
+  .match-drop.has-item { background: var(--surface2); border-style: solid; }
+  .match-drop:hover:not(.locked) { border-color: var(--accent2); }
+  .match-drop.correct-drop { border-color: var(--correct); background: #0a2318; }
+  .match-drop.wrong-drop { border-color: var(--wrong); background: #2a0a0a; }
+  .drop-x { color: var(--muted); cursor: pointer; margin-left: auto; }
+  .drop-x:hover { color: var(--wrong); }
+
+  /* CHECK BUTTON */
+  .check-btn {
+    margin-top: 14px;
+    padding: 9px 22px;
+    border-radius: 7px;
+    border: 1px solid var(--accent2);
+    background: #1a0f2e;
+    color: #c084fc;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+  }
+  .check-btn:hover { background: var(--accent2); color: white; }
+  .check-btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* RESULTS BANNER */
+  #results-banner {
+    display: none;
+    margin-top: 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 36px;
+    text-align: center;
+  }
+  #results-banner h2 { font-size: 28px; margin-bottom: 8px; }
+  #results-banner .big-score { font-size: 64px; font-family: 'JetBrains Mono', monospace; color: var(--accent); font-weight: 700; }
+  #results-banner .sub { color: var(--muted); font-size: 14px; margin-top: 6px; }
+  .restart-btn {
+    margin-top: 24px;
+    padding: 12px 32px;
+    background: var(--accent2);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .restart-btn:hover { opacity: 0.85; }
+
+  .note-box {
+    font-size: 11.5px;
+    color: var(--muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 14px;
+    margin-bottom: 20px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⚡ Network Security IT — Exam Reviewer</div>
+  <div class="score-bar">
+    <div class="score-badge correct-badge"><span>✓</span><span class="val" id="score-correct">0</span></div>
+    <div class="score-badge wrong-badge"><span>✗</span><span class="val" id="score-wrong">0</span></div>
+    <div class="score-badge"><span>Total</span><span class="val" id="score-total">0/40</span></div>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+</div>
+
+<main>
+  <div class="note-box">📋 Click an answer to check immediately. Red marks show wrong picks; green shows the correct answer.</div>
+  <div id="questions-container"></div>
+  <div id="results-banner">
+    <h2>🎉 Exam Complete!</h2>
+    <div class="big-score" id="final-score">0%</div>
+    <div class="sub" id="final-sub"></div>
+    <button class="restart-btn" onclick="restartExam()">Restart Exam</button>
+  </div>
+</main>
+
+<script>
+// ========================
+// QUESTION DATA
+// ========================
+const questions = [
+  {
+    id: 1,
+    type: "single",
+    text: "How does role separation improve server security?",
+    options: [
+      "By installing applications on separate hard disks.",
+      "By physically separating high-security servers from other servers.",
+      "By enforcing the principle of least privilege.",
+      "By placing servers on separate VLANs."
+    ],
+    correct: [2],
+    explanation: "Role separation improves security by enforcing the principle of least privilege — users and processes only get the minimum permissions needed."
+  },
+  {
+    id: 2,
+    type: "truefalse",
+    text: "For each statement, select True or False.",
+    statements: [
+      {
+        text: "Because senior executives have rights to access sensitive data, they should use administrator accounts.",
+        correct: false,
+        explanation: "False. Executives should use standard accounts; admin rights are separate from data access rights."
+      },
+      {
+        text: "One purpose of User Account Control (UAC) is to grant users the lowest level permissions required to complete their tasks.",
+        correct: true,
+        explanation: "True. UAC helps enforce least privilege by prompting for elevated permissions only when needed."
+      },
+      {
+        text: "System administrators should use a standard user account when performing routine functions like reading emails and browsing the internet.",
+        correct: true,
+        explanation: "True. Admins should avoid using admin accounts for everyday tasks to reduce exposure."
+      }
+    ]
+  },
+  {
+    id: 3,
+    type: "dropdown",
+    text: "The 'application.bat' file in the image (C:\\Apps\\application.bat) is currently on the [FILE SYSTEM] file system. [PERMISSION TYPE] permissions are currently being displayed for the 'application.bat' file.",
+    answers: [
+      { label: "File system", correct: "NTFS", options: ["NTFS","FAT32","exFAT","ReFS"] },
+      { label: "Permission type", correct: "Everyone", options: ["Administrators","Everyone","Users","SYSTEM"] }
+    ],
+    explanation: "The file is on an NTFS system (Windows permissions tab is only available on NTFS). The permissions shown are for the 'Everyone' group."
+  },
+  {
+    id: 4,
+    type: "match",
+    text: "Move each policy description from the list on the left to the correct policy on the right.",
+    items: [
+      "A policy that describes permissible behaviors on a computer network",
+      "A policy that grants or revokes permissions for an employee or a group of employees on a computer network",
+      "A policy that defines actions to take after an unexpected or uncommon event",
+      "A policy that defines the requirements to connect to a computer network from outside that network"
+    ],
+    targets: [
+      { label: "Remote Access Policy", correct: "A policy that defines the requirements to connect to a computer network from outside that network" },
+      { label: "Access Control Policy", correct: "A policy that grants or revokes permissions for an employee or a group of employees on a computer network" },
+      { label: "Incident Response Policy", correct: "A policy that defines actions to take after an unexpected or uncommon event" },
+      { label: "Acceptable Use Policy", correct: "A policy that describes permissible behaviors on a computer network" }
+    ]
+  },
+  {
+    id: 5,
+    type: "single",
+    text: "What is a user probably receiving if they get a large number of emails selling prescription medicine?",
+    options: ["Spam", "Malware", "Pharming mail", "Spoofed mail"],
+    correct: [0],
+    explanation: "Unsolicited bulk emails selling products like prescription drugs are classic spam."
+  },
+  {
+    id: 6,
+    type: "single",
+    text: "You create a web server for your school. When users visit your site, they get a certificate error that says your site is not trusted. What should you do to fix this problem?",
+    options: [
+      "Enable Public Keys on your website.",
+      "Use a digital signature.",
+      "Generate a certificate request.",
+      "Install a certificate from a trusted Certificate Authority (CA)."
+    ],
+    correct: [3],
+    explanation: "A 'not trusted' error means the certificate isn't signed by a recognized CA. Installing a certificate from a trusted CA resolves this."
+  },
+  {
+    id: 7,
+    type: "single",
+    text: "Creating MD5 hash for files is an example of ensuring what?",
+    options: ["Integrity", "Availability", "Confidentiality", "Least privilege"],
+    correct: [0],
+    explanation: "MD5 hashing verifies that files haven't been altered — this is the CIA triad concept of Integrity."
+  },
+  {
+    id: 8,
+    type: "single",
+    text: "Which link is a valid secure link to the CompanyPro account management site?",
+    options: [
+      "http://secure.companypro/SecureSignIn",
+      "http://VPN.VisitMe/logon.html",
+      "https://companypro/SecureSignIn/",
+      "http://VPN.VisitMe/SecureSignIn/"
+    ],
+    correct: [2],
+    explanation: "Only option C uses HTTPS (secure) and the correct companypro domain."
+  },
+  {
+    id: 9,
+    type: "truefalse",
+    text: "For each statement, select True or False.",
+    statements: [
+      {
+        text: "To protect users from malicious browser pop-ups, you should set a default browser configuration that blocks untrusted pop-ups.",
+        correct: true,
+        explanation: "True. Blocking untrusted pop-ups in browser settings is a standard protection measure."
+      },
+      {
+        text: "Pop-ups can display a realistic operating system or application error message.",
+        correct: true,
+        explanation: "True. Malicious pop-ups often mimic real OS/app errors to trick users."
+      },
+      {
+        text: "Protecting users from untrusted pop-up applications is mostly a function of awareness.",
+        correct: false,
+        explanation: "False. It primarily relies on technical controls like pop-up blockers, not just awareness."
+      }
+    ]
+  },
+  {
+    id: 10,
+    type: "match",
+    text: "Move each backup strategy to its recovery time description. (Strategy 1: Full backup every night. Strategy 2: Full + incremental Mon-Sat. Strategy 3: Full + differential Mon-Sat.)",
+    items: ["Strategy 1", "Strategy 2", "Strategy 3"],
+    targets: [
+      { label: "Method with fastest data recovery time", correct: "Strategy 1" },
+      { label: "Method with intermediate data recovery time", correct: "Strategy 3" },
+      { label: "Method with slowest data recovery time", correct: "Strategy 2" }
+    ],
+    explanation: "Full backup nightly (S1) = fastest restore (one backup set). Differential (S3) = intermediate (full + one differential). Incremental (S2) = slowest (full + all incrementals)."
+  },
+  {
+    id: 11,
+    type: "single",
+    text: "How should the certificate of a secure public web server on the internet be signed?",
+    options: [
+      "By an enterprise certificate authority (CA)",
+      "By a public certificate authority (CA)",
+      "By using a 4096-bit key",
+      "By using a 1024-bit key"
+    ],
+    correct: [1],
+    explanation: "Public web servers need certificates from a publicly trusted CA so browsers recognize and trust them."
+  },
+  {
+    id: 12,
+    type: "single",
+    text: "You need to implement a firewall that includes examining the origin of the data. Which type of firewall should you implement?",
+    options: ["Application layer", "Stateful", "Content filter", "Network layer"],
+    correct: [1],
+    explanation: "A stateful firewall tracks the origin and state of connections, examining where data comes from."
+  },
+  {
+    id: 13,
+    type: "single",
+    text: "What should you use to protect systems from buffer overflow errors?",
+    options: [
+      "An Intruder Prevention System",
+      "Data Execution Prevention",
+      "Antivirus software",
+      "A proxy server"
+    ],
+    correct: [1],
+    explanation: "Data Execution Prevention (DEP) prevents code from running in memory regions not designated for execution, protecting against buffer overflow exploits."
+  },
+  {
+    id: 14,
+    type: "single",
+    text: "Your anti-spam program is blocking emails from a particular sender. Your company needs to receive emails from this sender. What should you do?",
+    options: [
+      "Add the email address to the whitelist.",
+      "List the sender's email address in DNS.",
+      "Accept RSS feeds from their domain.",
+      "Reconfigure the SMS Gateway."
+    ],
+    correct: [0],
+    explanation: "Adding the sender to the whitelist (allowlist) tells the spam filter to allow their emails through."
+  },
+  {
+    id: 15,
+    type: "single",
+    text: "Which networking protocol provides centralized authentication, authorization, and accounting?",
+    options: ["HTTPS", "OpenID", "RADIUS", "SMTP"],
+    correct: [2],
+    explanation: "RADIUS (Remote Authentication Dial-In User Service) provides centralized AAA services."
+  },
+  {
+    id: 16,
+    type: "single",
+    text: "You are an intern at Sunset Web. You help manage 1000 workstations. All the workstations are members of an Active Directory Domain. You need to push an application security patch to all workstations. What is the quickest method to do this?",
+    options: ["Local security policy", "Logon script", "Windows Update", "Group policy"],
+    correct: [3],
+    explanation: "Group Policy allows centralized deployment of software and patches to all domain-joined machines simultaneously."
+  },
+  {
+    id: 17,
+    type: "single",
+    text: "You install a system-file checksum-verification application on your servers. What does this help to ensure?",
+    options: ["Confidentiality", "Integrity", "Accessibility", "Availability"],
+    correct: [1],
+    explanation: "Checksum verification detects unauthorized changes to files, ensuring data Integrity."
+  },
+  {
+    id: 18,
+    type: "single",
+    text: "Which type of password attack attempts to guess passwords by using a list of common passwords?",
+    options: ["Rainbow table", "Brute force", "Keylogger", "Dictionary"],
+    correct: [3],
+    explanation: "A dictionary attack uses a predefined list of common words and passwords to guess credentials."
+  },
+  {
+    id: 19,
+    type: "single",
+    text: "Why should you implement a wireless intrusion prevention system?",
+    options: [
+      "To prevent rogue wireless access points",
+      "To enforce SSID broadcasting",
+      "To prevent wireless interference",
+      "To detect wireless packet theft"
+    ],
+    correct: [0],
+    explanation: "A wireless IPS detects and prevents unauthorized (rogue) access points from operating on the network."
+  },
+  {
+    id: 20,
+    type: "multi",
+    text: "What are three major attack vectors that a social engineering hacker might use? (Choose 3.)",
+    options: [
+      "Honeypot systems",
+      "Dumpster diving",
+      "Telephone",
+      "Firewall interface",
+      "Reverse social engineering"
+    ],
+    correct: [1, 2, 4],
+    explanation: "Social engineering attack vectors include Dumpster diving (physical info gathering), Telephone (vishing), and Reverse social engineering (hacker poses as help desk)."
+  },
+  {
+    id: 21,
+    type: "truefalse",
+    text: "For each statement, select True or False.",
+    statements: [
+      {
+        text: "You can view audit logs in the Event Viewer.",
+        correct: true,
+        explanation: "True. Windows Event Viewer is the standard tool for viewing audit/security logs."
+      },
+      {
+        text: "Audit logs have a set size limit and cannot be adjusted.",
+        correct: false,
+        explanation: "False. Audit log size limits can be configured in Event Viewer properties."
+      },
+      {
+        text: "You can configure an event notification for an audited activity.",
+        correct: true,
+        explanation: "True. You can set up alerts/notifications for specific audited events."
+      }
+    ]
+  },
+  {
+    id: 22,
+    type: "multi",
+    text: "Which two vulnerabilities is a wireless network client exposed to? (Choose 2.)",
+    options: ["File corruption", "Rogue access points", "Eavesdropping", "Buffer overflow"],
+    correct: [1, 2],
+    explanation: "Wireless clients are exposed to rogue access points (fake APs stealing credentials) and eavesdropping (intercepting unencrypted traffic)."
+  },
+  {
+    id: 23,
+    type: "multi",
+    text: "Which two strategies will help keep your devices free from viruses and malware? (Choose 2.)",
+    options: [
+      "Keep antivirus and anti-malware software definitions are up to date.",
+      "Ensure that the Windows Firewall is disabled so it doesn't interfere with any anti-malware software scans.",
+      "Ensure that all network ports are available so all important network traffic can get through.",
+      "Ensure that Real-time Protection is disabled.",
+      "Configure full antivirus and anti-malware scans to run automatically on a regular schedule."
+    ],
+    correct: [0, 4],
+    explanation: "Keeping definitions updated and scheduling regular automatic scans are the two key strategies for malware protection."
+  },
+  {
+    id: 24,
+    type: "single",
+    text: "Your organization has a Windows Bring Your Own Device (BYOD) policy that includes ensuring that all devices are protected against various malware attacks. Where should you go on the local device to verify and configure the appropriate settings?",
+    options: [
+      "Device Performance and Health",
+      "Account Protection",
+      "Virus & Threat Protection",
+      "User Account Control"
+    ],
+    correct: [2],
+    explanation: "Virus & Threat Protection in Windows Security is where you configure and verify malware protection settings."
+  },
+  {
+    id: 25,
+    type: "single",
+    text: "What is an example of physical security for a laptop?",
+    options: ["Fingerprint reader", "Cable lock", "Docking station", "External USB drive"],
+    correct: [1],
+    explanation: "A cable lock physically secures the laptop to a desk or fixture — that is physical security."
+  },
+  {
+    id: 26,
+    type: "single",
+    text: "Which term refers to a physical opportunity that a hacker might use to look for information about a computer network?",
+    options: ["Reverse social engineering", "Phishing", "Dumpster diving", "Malware"],
+    correct: [2],
+    explanation: "Dumpster diving is searching through physical trash for discarded documents with sensitive information."
+  },
+  {
+    id: 27,
+    type: "single",
+    text: "You are a network administrator. All computers run the Chrome browser. You need to prevent third-party cookies from being saved. What should you enforce?",
+    options: ["Antivirus protection", "Cross-Site Scripting Filter", "Incognito", "SmartScreen Filter"],
+    correct: [2],
+    explanation: "Chrome's Incognito mode does not save cookies, preventing third-party cookie storage."
+  },
+  {
+    id: 28,
+    type: "single",
+    text: "What can intercept passwords that are transmitted in clear text?",
+    options: ["A Kerberos client", "A rogue DHCP server", "An IPsec decoder", "A packet sniffer"],
+    correct: [3],
+    explanation: "A packet sniffer captures network traffic including cleartext credentials like unencrypted passwords."
+  },
+  {
+    id: 29,
+    type: "single",
+    text: "The client computers on your network are stable and do not need any new features. What is a benefit of applying operating system updates to these clients?",
+    options: [
+      "Update the hardware firewall.",
+      "Keep the software licensed.",
+      "Close existing vulnerabilities.",
+      "Keep the server ports available."
+    ],
+    correct: [2],
+    explanation: "Even without new features, OS updates patch security vulnerabilities and close exploitable gaps."
+  },
+  {
+    id: 30,
+    type: "single",
+    text: "You need to hide internal IP addresses from the internet while maintaining client internet access. What should you implement?",
+    options: [
+      "Secure Sockets Layer (SSL)",
+      "Access Control Lists",
+      "Network Address Translation (NAT)",
+      "Port forwarding"
+    ],
+    correct: [2],
+    explanation: "NAT translates private internal IP addresses to a public IP, hiding the internal network from the internet."
+  },
+  {
+    id: 31,
+    type: "single",
+    text: "You have two servers that run Windows Server. All the server drives have been formatted by using NTFS. You move a file from one server to the other server. What permissions does the file have in the new location?",
+    options: [
+      "The file retains the original folder's permissions.",
+      "Access will be limited to members of the Administrators group.",
+      "The file inherits the destination folder's permissions.",
+      "Members of the Everyone group will have full access to the file."
+    ],
+    correct: [2],
+    explanation: "When moving a file between NTFS volumes, the file inherits the permissions of the destination folder."
+  },
+  {
+    id: 32,
+    type: "order",
+    text: "You have an off-domain computer suspected of malware infection. You need to ensure the computer is completely safe and user files are available. Place actions in correct order.",
+    items: [
+      "Reinstall the OS and applications from the original media.",
+      "Update everything, including the OS, applications, and anti-virus/anti-malware tools.",
+      "Restore the user data from the backup image.",
+      "Reformat the disk.",
+      "Back up the entire system."
+    ],
+    correct: [
+      "Back up the entire system.",
+      "Reformat the disk.",
+      "Reinstall the OS and applications from the original media.",
+      "Update everything, including the OS, applications, and anti-virus/anti-malware tools.",
+      "Restore the user data from the backup image."
+    ],
+    explanation: "Correct order: 1) Back up, 2) Reformat, 3) Reinstall OS/apps, 4) Update everything, 5) Restore user data."
+  },
+  {
+    id: 33,
+    type: "single",
+    text: "What is the first step when conducting a physical security audit?",
+    options: [
+      "Inventory the company's technology assets.",
+      "Set up the system logs to audit security events.",
+      "Set up a virus quarantine area.",
+      "Install auditing software on your servers."
+    ],
+    correct: [0],
+    explanation: "The first step in a physical security audit is to inventory all technology assets so you know what needs to be secured."
+  },
+  {
+    id: 34,
+    type: "single",
+    text: "Which technology examines packet header information to determine whether network traffic is allowed to enter the internal network?",
+    options: ["Dedicated firewall", "RADIUS server", "BitLocker To Go", "Antivirus software"],
+    correct: [0],
+    explanation: "A dedicated firewall inspects packet headers to allow or block traffic based on defined rules."
+  },
+  {
+    id: 35,
+    type: "multi",
+    text: "What are two benefits to using an incremental backup solution instead of a differential backup solution? (Choose 2.)",
+    options: [
+      "Less storage space required",
+      "Less time needed to back up data",
+      "Less administrative effort",
+      "Less time needed to recover data"
+    ],
+    correct: [0, 1],
+    explanation: "Incremental backups only back up changes since the last backup (of any type), using less storage and less backup time than differential backups."
+  },
+  {
+    id: 36,
+    type: "truefalse",
+    text: "For each statement, select True or False.",
+    statements: [
+      {
+        text: "IPsec requires network applications to be IPsec aware.",
+        correct: false,
+        explanation: "False. IPsec works at the network layer transparently — applications don't need to be IPsec aware."
+      },
+      {
+        text: "IPsec can encrypt data.",
+        correct: true,
+        explanation: "True. IPsec provides encryption through ESP (Encapsulating Security Payload)."
+      },
+      {
+        text: "IPsec adds overhead for all network communications for which it is used.",
+        correct: true,
+        explanation: "True. Encryption and authentication processing adds overhead to communications."
+      }
+    ]
+  },
+  {
+    id: 37,
+    type: "multi",
+    text: "What are three examples of two-factor authentication? (Choose 3.)",
+    options: [
+      "A username and a password",
+      "A password and a PIN number",
+      "A fingerprint and a pattern",
+      "A password and a smart card",
+      "A PIN number and a debit card"
+    ],
+    correct: [2, 3, 4],
+    explanation: "2FA requires two different factor types. C: biometric + something you know. D: something you know + something you have. E: something you know + something you have."
+  },
+  {
+    id: 38,
+    type: "single",
+    text: "You learn that several employees have downloaded and installed a browser extension that translates text. What should you do?",
+    options: [
+      "Disable the browser extension and implement controls to allow only corporate-approved browser extensions.",
+      "Make sure the browser extension is set to read-only mode, so it cannot overwrite critical information.",
+      "Remove the browser extension because it will perform malicious activities.",
+      "Nothing, browser extensions pose no harm to the machine or the user."
+    ],
+    correct: [0],
+    explanation: "Proper security practice is to disable unauthorized extensions and enforce a policy allowing only approved browser extensions."
+  },
+  {
+    id: 39,
+    type: "single",
+    text: "You have an application that uses IPsec to secure communications between an internet client and a server on the internal network. To which network security service must the IPsec client connect?",
+    options: ["SFTP", "VPN", "SSH", "RADIUS"],
+    correct: [1],
+    explanation: "IPsec is commonly used within VPN connections. The client connects to a VPN gateway to establish the IPsec tunnel."
+  },
+  {
+    id: 40,
+    type: "single",
+    text: "Your manager wants to be sure that you understand the types of social engineering threats that might occur. Which type of threat mitigation educates the staff within an organization, explaining what to do, when, why, and by whom?",
+    options: [
+      "Acceptable Use Policy",
+      "Physical Security",
+      "Defense in Depth",
+      "Policies, Procedures, and Awareness"
+    ],
+    correct: [3],
+    explanation: "Policies, Procedures, and Awareness programs educate staff on security threats and proper responses."
+  }
+];
+
+// ========================
+// STATE
+// ========================
+let answered = new Array(questions.length).fill(false);
+let correctCount = 0;
+let wrongCount = 0;
+
+function updateScore() {
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-wrong').textContent = wrongCount;
+  document.getElementById('score-total').textContent = `${correctCount + wrongCount}/40`;
+  const pct = ((correctCount + wrongCount) / 40) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  if (correctCount + wrongCount === 40) {
+    showResults();
+  }
+}
+
+function markAnswered(idx, isCorrect) {
+  if (answered[idx]) return false;
+  answered[idx] = true;
+  if (isCorrect) correctCount++; else wrongCount++;
+  updateScore();
+  return true;
+}
+
+// ========================
+// RENDER HELPERS
+// ========================
+function renderSingle(q, idx) {
+  const opts = q.options.map((o, i) => `
+    <div class="option" id="opt-${idx}-${i}" onclick="checkSingle(${idx},${i})">
+      <div class="opt-letter">${String.fromCharCode(65+i)}</div>
+      <div class="opt-text">${o}</div>
+      <div class="opt-icon" id="opt-icon-${idx}-${i}"></div>
+    </div>`).join('');
+  const badge = q.type === 'single' ? '' : '';
+  return `<div class="options">${opts}</div>
+    <div class="feedback" id="fb-${idx}"></div>`;
+}
+
+function renderMulti(q, idx) {
+  const opts = q.options.map((o, i) => `
+    <div class="option" id="opt-${idx}-${i}" onclick="toggleMulti(${idx},${i})">
+      <div class="opt-letter">${String.fromCharCode(65+i)}</div>
+      <div class="opt-text">${o}</div>
+      <div class="opt-icon" id="opt-icon-${idx}-${i}"></div>
+    </div>`).join('');
+  return `<div class="options" id="opts-${idx}">${opts}</div>
+    <button class="check-btn" id="chk-${idx}" onclick="checkMulti(${idx})">Check Answer</button>
+    <div class="feedback" id="fb-${idx}"></div>`;
+}
+
+function renderTrueFalse(q, idx) {
+  const rows = q.statements.map((s, si) => `
+    <div class="tf-row" id="tf-row-${idx}-${si}">
+      <div class="tf-stmt">${s.text}</div>
+      <div class="tf-btns">
+        <button class="tf-btn" id="tf-t-${idx}-${si}" onclick="checkTF(${idx},${si},true)">True</button>
+        <button class="tf-btn" id="tf-f-${idx}-${si}" onclick="checkTF(${idx},${si},false)">False</button>
+      </div>
+    </div>`).join('');
+  return `${rows}<div class="feedback" id="fb-${idx}"></div>`;
+}
+
+function renderMatch(q, idx) {
+  const srcItems = q.items.map((item, i) => `
+    <div class="match-item" id="msrc-${idx}-${i}" onclick="selectMatchItem(${idx},${i})">${item}</div>
+  `).join('');
+  const tgtRows = q.targets.map((t, ti) => `
+    <div class="match-target-row">
+      <div class="match-target-label">${t.label}</div>
+      <div class="match-drop" id="mdrop-${idx}-${ti}" onclick="placeMatchItem(${idx},${ti})">
+        <span class="drop-text" id="drop-text-${idx}-${ti}" style="color:var(--muted);font-size:12px;">Drop here</span>
+        <span class="drop-x" id="drop-x-${idx}-${ti}" style="display:none" onclick="removeMatchItem(event,${idx},${ti})">✕</span>
+      </div>
+    </div>`).join('');
+  return `
+    <div class="match-wrap">
+      <div class="match-source">
+        <div class="order-label">Descriptions</div>
+        ${srcItems}
+      </div>
+      <div class="match-targets">
+        <div class="order-label">Policies / Categories</div>
+        ${tgtRows}
+      </div>
+    </div>
+    <button class="check-btn" id="chk-${idx}" onclick="checkMatch(${idx})">Check Answer</button>
+    <div class="feedback" id="fb-${idx}"></div>`;
+}
+
+function renderOrder(q, idx) {
+  const srcItems = q.items.map((item, i) => `
+    <div class="order-item" id="osrc-${idx}-${i}" onclick="selectOrderItem(${idx},${i})">${item}</div>
+  `).join('');
+  const slots = q.correct.map((_, si) => `
+    <div class="order-slot" id="oslot-${idx}-${si}">
+      <span class="slot-num">${si+1}</span>
+      <span class="slot-text" id="slot-text-${idx}-${si}" style="color:var(--muted);font-size:12px;">Click item then slot</span>
+      <span class="slot-remove" id="slot-rm-${idx}-${si}" style="display:none" onclick="removeOrderItem(${idx},${si})">✕</span>
+    </div>`).join('');
+  return `
+    <div class="order-wrap">
+      <div class="order-source">
+        <div class="order-label">Actions</div>
+        ${srcItems}
+      </div>
+      <div class="order-target">
+        <div class="order-label">Actions in Order</div>
+        ${slots}
+      </div>
+    </div>
+    <button class="check-btn" id="chk-${idx}" onclick="checkOrder(${idx})">Check Answer</button>
+    <div class="feedback" id="fb-${idx}"></div>`;
+}
+
+function renderDropdown(q, idx) {
+  const sels = q.answers.map((a, ai) => `
+    <div style="margin-bottom:10px">
+      <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:5px">${a.label}</div>
+      <select id="dd-${idx}-${ai}" style="padding:9px 14px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Sora',sans-serif;font-size:13.5px;width:100%;cursor:pointer;outline:none;">
+        <option value="">-- Select --</option>
+        ${a.options.map(o => `<option value="${o}">${o}</option>`).join('')}
+      </select>
+      <div class="feedback" id="fb-${idx}-${ai}" style="margin-top:6px"></div>
+    </div>`).join('');
+  return `${sels}
+    <button class="check-btn" id="chk-${idx}" onclick="checkDropdown(${idx})">Check Answer</button>
+    <div class="feedback" id="fb-${idx}"></div>`;
+}
+
+// ========================
+// CHECK LOGIC
+// ========================
+window.selectedMulti = {};
+window.selectedMatchItem = {};
+window.matchState = {};
+window.selectedOrderItem = {};
+window.orderState = {};
+
+function checkSingle(idx, chosen) {
+  if (answered[idx]) return;
+  const q = questions[idx];
+  const isCorrect = q.correct[0] === chosen;
+  lockOptions(idx, q.options.length);
+  // highlight
+  for (let i = 0; i < q.options.length; i++) {
+    const el = document.getElementById(`opt-${idx}-${i}`);
+    el.classList.add('locked');
+    if (q.correct.includes(i)) {
+      el.classList.add('correct-ans');
+      document.getElementById(`opt-icon-${idx}-${i}`).textContent = '✓';
+    }
+    if (i === chosen && !q.correct.includes(i)) {
+      el.classList.add('wrong-ans');
+      document.getElementById(`opt-icon-${idx}-${i}`).textContent = '✗';
+    }
+  }
+  showFeedback(idx, isCorrect, q.explanation);
+  const card = document.getElementById(`card-${idx}`);
+  card.classList.add(isCorrect ? 'answered-correct' : 'answered-wrong');
+  markAnswered(idx, isCorrect);
+}
+
+function lockOptions(idx, count) {
+  for (let i = 0; i < count; i++) {
+    const el = document.getElementById(`opt-${idx}-${i}`);
+    if (el) el.classList.add('locked');
+  }
+}
+
+function toggleMulti(idx, i) {
+  if (answered[idx]) return;
+  if (!selectedMulti[idx]) selectedMulti[idx] = new Set();
+  const el = document.getElementById(`opt-${idx}-${i}`);
+  if (selectedMulti[idx].has(i)) {
+    selectedMulti[idx].delete(i);
+    el.classList.remove('selected');
+  } else {
+    selectedMulti[idx].add(i);
+    el.classList.add('selected');
+  }
+}
+
+function checkMulti(idx) {
+  if (answered[idx]) return;
+  const q = questions[idx];
+  const sel = selectedMulti[idx] ? [...selectedMulti[idx]] : [];
+  const correctSet = new Set(q.correct);
+  const selSet = new Set(sel);
+  const isCorrect = correctSet.size === selSet.size && [...correctSet].every(x => selSet.has(x));
+  lockOptions(idx, q.options.length);
+  document.getElementById(`chk-${idx}`).disabled = true;
+  for (let i = 0; i < q.options.length; i++) {
+    const el = document.getElementById(`opt-${idx}-${i}`);
+    el.classList.add('locked');
+    if (q.correct.includes(i)) {
+      el.classList.add('correct-ans');
+      document.getElementById(`opt-icon-${idx}-${i}`).textContent = '✓';
+    } else if (selSet.has(i)) {
+      el.classList.add('wrong-ans');
+      document.getElementById(`opt-icon-${idx}-${i}`).textContent = '✗';
+    }
+  }
+  showFeedback(idx, isCorrect, q.explanation);
+  document.getElementById(`card-${idx}`).classList.add(isCorrect ? 'answered-correct' : 'answered-wrong');
+  markAnswered(idx, isCorrect);
+}
+
+function checkTF(idx, si, val) {
+  const q = questions[idx];
+  const stmt = q.statements[si];
+  const tBtn = document.getElementById(`tf-t-${idx}-${si}`);
+  const fBtn = document.getElementById(`tf-f-${idx}-${si}`);
+  if (tBtn.classList.contains('correct-t') || tBtn.classList.contains('wrong-sel') || fBtn.classList.contains('correct-f') || fBtn.classList.contains('wrong-sel')) return;
+  const isCorrect = val === stmt.correct;
+  if (val === true) {
+    tBtn.classList.add(isCorrect ? 'correct-t' : 'wrong-sel');
+    if (!isCorrect) fBtn.classList.add('correct-f');
+  } else {
+    fBtn.classList.add(isCorrect ? 'correct-f' : 'wrong-sel');
+    if (!isCorrect) tBtn.classList.add('correct-t');
+  }
+  tBtn.classList.add('locked');
+  fBtn.classList.add('locked');
+  const row = document.getElementById(`tf-row-${idx}-${si}`);
+  row.classList.add(isCorrect ? 'tf-correct' : 'tf-wrong');
+  // Show individual explanation
+  const fb = document.createElement('div');
+  fb.className = `feedback show ${isCorrect ? 'correct-fb' : 'wrong-fb'}`;
+  fb.style.marginTop = '8px';
+  fb.textContent = stmt.explanation;
+  row.appendChild(fb);
+  // check if all statements answered for this question
+  const allDone = q.statements.every((_, i) => {
+    const t = document.getElementById(`tf-t-${idx}-${i}`);
+    return t.classList.contains('correct-t') || t.classList.contains('wrong-sel') || t.classList.contains('correct-f');
+  });
+  // simplified: count partial but mark answered when all done
+  // Actually mark answered per-statement would be complex; mark after all done
+  if (allDone && !answered[idx]) {
+    const allCorrect = q.statements.every((s, i) => {
+      const t = document.getElementById(`tf-t-${idx}-${i}`);
+      const f = document.getElementById(`tf-f-${idx}-${i}`);
+      return t.classList.contains('correct-t') || f.classList.contains('correct-f');
+    });
+    document.getElementById(`card-${idx}`).classList.add(allCorrect ? 'answered-correct' : 'answered-wrong');
+    markAnswered(idx, allCorrect);
+  }
+}
+
+function selectMatchItem(idx, i) {
+  if (answered[idx]) return;
+  // deselect previous
+  if (selectedMatchItem[idx] !== undefined) {
+    document.getElementById(`msrc-${idx}-${selectedMatchItem[idx]}`).classList.remove('selected-item');
+  }
+  selectedMatchItem[idx] = i;
+  document.getElementById(`msrc-${idx}-${i}`).classList.add('selected-item');
+}
+
+function placeMatchItem(idx, ti) {
+  if (answered[idx]) return;
+  if (selectedMatchItem[idx] === undefined) return;
+  if (!matchState[idx]) matchState[idx] = {};
+  const srcIdx = selectedMatchItem[idx];
+  // if slot already has item, return old item to source
+  if (matchState[idx][ti] !== undefined) {
+    const oldSrc = matchState[idx][ti];
+    document.getElementById(`msrc-${idx}-${oldSrc}`).classList.remove('placed');
+  }
+  matchState[idx][ti] = srcIdx;
+  document.getElementById(`msrc-${idx}-${srcIdx}`).classList.add('placed');
+  document.getElementById(`msrc-${idx}-${srcIdx}`).classList.remove('selected-item');
+  const q = questions[idx];
+  document.getElementById(`drop-text-${idx}-${ti}`).textContent = q.items[srcIdx];
+  document.getElementById(`drop-text-${idx}-${ti}`).style.color = 'var(--text)';
+  document.getElementById(`drop-x-${idx}-${ti}`).style.display = 'inline';
+  document.getElementById(`mdrop-${idx}-${ti}`).classList.add('has-item');
+  selectedMatchItem[idx] = undefined;
+}
+
+function removeMatchItem(e, idx, ti) {
+  if (answered[idx]) return;
+  e.stopPropagation();
+  if (!matchState[idx] || matchState[idx][ti] === undefined) return;
+  const srcIdx = matchState[idx][ti];
+  document.getElementById(`msrc-${idx}-${srcIdx}`).classList.remove('placed');
+  matchState[idx][ti] = undefined;
+  document.getElementById(`drop-text-${idx}-${ti}`).textContent = 'Drop here';
+  document.getElementById(`drop-text-${idx}-${ti}`).style.color = 'var(--muted)';
+  document.getElementById(`drop-x-${idx}-${ti}`).style.display = 'none';
+  document.getElementById(`mdrop-${idx}-${ti}`).classList.remove('has-item');
+}
+
+function checkMatch(idx) {
+  if (answered[idx]) return;
+  const q = questions[idx];
+  if (!matchState[idx]) matchState[idx] = {};
+  let allCorrect = true;
+  for (let ti = 0; ti < q.targets.length; ti++) {
+    const placed = matchState[idx][ti];
+    const dropEl = document.getElementById(`mdrop-${idx}-${ti}`);
+    if (placed === undefined) {
+      allCorrect = false;
+      continue;
+    }
+    const placedText = q.items[placed];
+    const isCorr = placedText === q.targets[ti].correct;
+    dropEl.classList.add(isCorr ? 'correct-drop' : 'wrong-drop');
+    if (!isCorr) allCorrect = false;
+  }
+  document.getElementById(`chk-${idx}`).disabled = true;
+  // lock source items
+  q.items.forEach((_, i) => {
+    document.getElementById(`msrc-${idx}-${i}`).classList.add('locked');
+  });
+  showFeedback(idx, allCorrect, q.explanation);
+  document.getElementById(`card-${idx}`).classList.add(allCorrect ? 'answered-correct' : 'answered-wrong');
+  markAnswered(idx, allCorrect);
+}
+
+function selectOrderItem(idx, i) {
+  if (answered[idx]) return;
+  if (selectedOrderItem[idx] !== undefined) {
+    document.getElementById(`osrc-${idx}-${selectedOrderItem[idx]}`).classList.remove('selected-item');
+  }
+  selectedOrderItem[idx] = i;
+  document.getElementById(`osrc-${idx}-${i}`).classList.add('selected-item');
+}
+
+function removeOrderItem(idx, si) {
+  if (answered[idx]) return;
+  if (!orderState[idx]) return;
+  const srcIdx = orderState[idx][si];
+  if (srcIdx === undefined) return;
+  document.getElementById(`osrc-${idx}-${srcIdx}`).classList.remove('placed');
+  orderState[idx][si] = undefined;
+  document.getElementById(`slot-text-${idx}-${si}`).textContent = 'Click item then slot';
+  document.getElementById(`slot-text-${idx}-${si}`).style.color = 'var(--muted)';
+  document.getElementById(`slot-rm-${idx}-${si}`).style.display = 'none';
+  document.getElementById(`oslot-${idx}-${si}`).classList.remove('filled');
+}
+
+// Make slots clickable to receive items
+function setupOrderSlots(idx, q) {
+  for (let si = 0; si < q.correct.length; si++) {
+    (function(si_) {
+      document.getElementById(`oslot-${idx}-${si_}`).addEventListener('click', function() {
+        if (answered[idx]) return;
+        if (selectedOrderItem[idx] === undefined) return;
+        if (!orderState[idx]) orderState[idx] = {};
+        const srcIdx = selectedOrderItem[idx];
+        // remove old from this slot
+        if (orderState[idx][si_] !== undefined) {
+          document.getElementById(`osrc-${idx}-${orderState[idx][si_]}`).classList.remove('placed');
+        }
+        orderState[idx][si_] = srcIdx;
+        document.getElementById(`osrc-${idx}-${srcIdx}`).classList.add('placed');
+        document.getElementById(`osrc-${idx}-${srcIdx}`).classList.remove('selected-item');
+        document.getElementById(`slot-text-${idx}-${si_}`).textContent = q.items[srcIdx];
+        document.getElementById(`slot-text-${idx}-${si_}`).style.color = 'var(--text)';
+        document.getElementById(`slot-rm-${idx}-${si_}`).style.display = 'inline';
+        document.getElementById(`oslot-${idx}-${si_}`).classList.add('filled');
+        selectedOrderItem[idx] = undefined;
+      });
+    })(si);
+  }
+}
+
+function checkOrder(idx) {
+  if (answered[idx]) return;
+  const q = questions[idx];
+  if (!orderState[idx]) orderState[idx] = {};
+  let allCorrect = true;
+  for (let si = 0; si < q.correct.length; si++) {
+    const placed = orderState[idx][si];
+    const slotEl = document.getElementById(`oslot-${idx}-${si}`);
+    if (placed === undefined) { allCorrect = false; continue; }
+    const placedText = q.items[placed];
+    const isCorr = placedText === q.correct[si];
+    slotEl.classList.add(isCorr ? 'correct-slot' : 'wrong-slot');
+    if (!isCorr) allCorrect = false;
+  }
+  document.getElementById(`chk-${idx}`).disabled = true;
+  showFeedback(idx, allCorrect, q.explanation);
+  document.getElementById(`card-${idx}`).classList.add(allCorrect ? 'answered-correct' : 'answered-wrong');
+  markAnswered(idx, allCorrect);
+}
+
+function checkDropdown(idx) {
+  if (answered[idx]) return;
+  const q = questions[idx];
+  let allCorrect = true;
+  q.answers.forEach((a, ai) => {
+    const sel = document.getElementById(`dd-${idx}-${ai}`).value;
+    const isCorr = sel === a.correct;
+    const fb = document.getElementById(`fb-${idx}-${ai}`);
+    fb.className = `feedback show ${isCorr ? 'correct-fb' : 'wrong-fb'}`;
+    fb.textContent = isCorr ? `✓ Correct! "${a.correct}" is right.` : `✗ Incorrect. The correct answer is "${a.correct}".`;
+    document.getElementById(`dd-${idx}-${ai}`).style.borderColor = isCorr ? 'var(--correct)' : 'var(--wrong)';
+    document.getElementById(`dd-${idx}-${ai}`).disabled = true;
+    if (!isCorr) allCorrect = false;
+  });
+  document.getElementById(`chk-${idx}`).disabled = true;
+  showFeedback(idx, allCorrect, q.explanation);
+  document.getElementById(`card-${idx}`).classList.add(allCorrect ? 'answered-correct' : 'answered-wrong');
+  markAnswered(idx, allCorrect);
+}
+
+function showFeedback(idx, isCorrect, explanation) {
+  const fb = document.getElementById(`fb-${idx}`);
+  if (!fb) return;
+  fb.className = `feedback show ${isCorrect ? 'correct-fb' : 'wrong-fb'}`;
+  fb.textContent = (isCorrect ? '✓ Correct! ' : '✗ Incorrect. ') + (explanation || '');
+}
+
+// ========================
+// RENDER ALL QUESTIONS
+// ========================
+function renderAll() {
+  const container = document.getElementById('questions-container');
+  container.innerHTML = '';
+  questions.forEach((q, idx) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `card-${idx}`;
+
+    let badgeHtml = '';
+    if (q.type === 'multi') badgeHtml = `<span class="q-badge multi">Choose ${q.correct.length}</span>`;
+    else if (q.type === 'truefalse') badgeHtml = `<span class="q-badge truefalse">True / False</span>`;
+    else if (q.type === 'order') badgeHtml = `<span class="q-badge order">Order</span>`;
+    else if (q.type === 'match') badgeHtml = `<span class="q-badge order">Match</span>`;
+    else if (q.type === 'dropdown') badgeHtml = `<span class="q-badge dropdown">Fill In</span>`;
+
+    let body = '';
+    if (q.type === 'single') body = renderSingle(q, idx);
+    else if (q.type === 'multi') body = renderMulti(q, idx);
+    else if (q.type === 'truefalse') body = renderTrueFalse(q, idx);
+    else if (q.type === 'match') body = renderMatch(q, idx);
+    else if (q.type === 'order') body = renderOrder(q, idx);
+    else if (q.type === 'dropdown') body = renderDropdown(q, idx);
+
+    card.innerHTML = `
+      <div class="q-header">
+        <div class="q-num">Q${q.id} of 40</div>
+        <div class="q-text">${q.text}</div>
+        ${badgeHtml}
+      </div>
+      ${body}
+    `;
+    container.appendChild(card);
+
+    if (q.type === 'order') setupOrderSlots(idx, q);
+  });
+}
+
+function showResults() {
+  const banner = document.getElementById('results-banner');
+  banner.style.display = 'block';
+  const pct = Math.round((correctCount / 40) * 100);
+  document.getElementById('final-score').textContent = pct + '%';
+  let remark = pct >= 90 ? '🏆 Excellent! Ready for the real exam!' : pct >= 75 ? '👍 Good job! Keep reviewing.' : '📚 Keep studying — you got this!';
+  document.getElementById('final-sub').textContent = `${correctCount} correct out of 40 — ${remark}`;
+  banner.scrollIntoView({ behavior: 'smooth' });
+}
+
+function restartExam() {
+  answered = new Array(questions.length).fill(false);
+  correctCount = 0;
+  wrongCount = 0;
+  selectedMulti = {};
+  selectedMatchItem = {};
+  matchState = {};
+  selectedOrderItem = {};
+  orderState = {};
+  updateScore();
+  document.getElementById('results-banner').style.display = 'none';
+  renderAll();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+renderAll();
+</script>
+</body>
+</html>
